@@ -1,22 +1,29 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import Usuario from '../models/usuarios.js';
+import db from '../models/index.js';
 
 const register = async (req, res) => {
-  const { email, usuario, contraseña } = req.body;
+  const { email, usuario, contrasena } = req.body;
+  console.log(req.body)
+
+
+  if (!email || !usuario || !contrasena) {
+    return res.status(400).json({ message: 'Todos los campos son obligatorios' });
+  }
 
   try {
-    const hashedPassword = await bcrypt.hash(contraseña, 10);
+    const hashedPassword = await bcrypt.hash(contrasena, 10);
 
-    const newUser = await Usuario.create({
+    const newUser = await db.usuarios.create({
       email,
       usuario,
-      contraseña: hashedPassword,
+      contrasena: hashedPassword,
     });
 
-    res.status(201).json(newUser);
-  } catch (err) {
-    res.status(500).json({ error: 'Error registering user' });
+    res.status(201).json({ message: 'Usuario registrado exitosamente', user: newUser });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Error registrando usuario' });
   }
 };
 
@@ -24,14 +31,15 @@ const login = async (req, res) => {
   const { email, contraseña } = req.body;
 
   try {
-    const user = await Usuario.findOne({ where: { email } });
+    const user = await db.usuarios.findOne({ where: { email: email } });
+    console.log(user)
 
     if (!user) {
       return res.status(400).json({ error: 'User not found' });
     }
 
-    const isMatch = await bcrypt.compare(contraseña, user.contraseña);
-
+    const isMatch = await bcrypt.compare(contraseña, user.contrasena);
+    console.log(isMatch)
     if (!isMatch) {
       return res.status(400).json({ error: 'Invalid credentials' });
     }
@@ -39,7 +47,8 @@ const login = async (req, res) => {
     const token = jwt.sign({ email: user.email }, 'secret_key', { expiresIn: '1h' });
 
     res.status(200).json({ token });
-  } catch (err) {
+  } catch (error) {
+    console.error(error);
     res.status(500).json({ error: 'Error logging in' });
   }
 };

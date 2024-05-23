@@ -35,3 +35,11 @@
 .read-the-docs {
   color: #888;
 }
+
+button {
+  margin: 7px;
+}
+
+input {
+  margin: 5px;
+}

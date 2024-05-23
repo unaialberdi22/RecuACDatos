@@ -1,6 +1,6 @@
 'use strict';
 export default (sequelize, DataTypes) => {
-    const Usuarios = sequelize.define('paradas', {
+    const Usuarios = sequelize.define('usuarios', {
         email: {
             type: DataTypes.STRING(255),
             primaryKey: true,
